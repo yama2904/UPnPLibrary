@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UPnPLibrary
+namespace UPnPLibrary.Description.Device
 {
-    public class UPnP
+    public class GeneralInfo
     {
-
     }
 }

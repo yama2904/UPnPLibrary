@@ -4,16 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AF29F98A-50B5-4739-9FE6-97D319DD02F5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UPnPLibrary</RootNamespace>
-    <AssemblyName>UPnPLibrary</AssemblyName>
+    <ProjectGuid>{5C17AA2F-A5C1-47F4-878A-95CA0EC761C6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ConsoleApp1</RootNamespace>
+    <AssemblyName>ConsoleApp1</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,18 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Description\Device\DisplayInfo.cs" />
-    <Compile Include="Description\Device\GeneralInfo.cs" />
-    <Compile Include="Description\Device\ServiceInfo.cs" />
-    <Compile Include="Description\Service\ActionInfo.cs" />
-    <Compile Include="Description\Service\ServiceDescription.cs" />
-    <Compile Include="Description\Device\DeviceDescription.cs" />
-    <Compile Include="Description\Service\VariableInfo.cs" />
-    <Compile Include="Ssdp\MSearchMessage.cs" />
-    <Compile Include="Ssdp\NotifyMessage.cs" />
-    <Compile Include="UPnPDevicesDiscovery.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UPnPLibrary\UPnPLibrary.csproj">
+      <Project>{af29f98a-50b5-4739-9fe6-97d319dd02f5}</Project>
+      <Name>UPnPLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
