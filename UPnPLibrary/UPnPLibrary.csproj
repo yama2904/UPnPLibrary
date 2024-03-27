@@ -41,16 +41,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Description\Device\DisplayInfo.cs" />
-    <Compile Include="Description\Device\GeneralInfo.cs" />
+    <Compile Include="Description\Device\DeviceInfo.cs" />
+    <Compile Include="Description\Device\IconInfo.cs" />
     <Compile Include="Description\Device\ServiceInfo.cs" />
-    <Compile Include="Description\Service\ActionInfo.cs" />
+    <Compile Include="Description\Service\Action\ActionInfo.cs" />
+    <Compile Include="Description\Service\Action\Argument.cs" />
     <Compile Include="Description\Service\ServiceDescription.cs" />
     <Compile Include="Description\Device\DeviceDescription.cs" />
-    <Compile Include="Description\Service\VariableInfo.cs" />
+    <Compile Include="Description\Service\ServiceDescriptionList.cs" />
+    <Compile Include="Description\Service\StateVariable\AllowedValueRange.cs" />
+    <Compile Include="Description\Service\StateVariable\StateVariableInfo.cs" />
     <Compile Include="Ssdp\MSearchMessage.cs" />
     <Compile Include="Ssdp\NotifyMessage.cs" />
-    <Compile Include="UPnPDevicesDiscovery.cs" />
+    <Compile Include="UPnPClient.cs" />
+    <Compile Include="UPnPDevice.cs" />
+    <Compile Include="UPnPRequestMessage.cs" />
+    <Compile Include="UPnPTarget.cs" />
+    <Compile Include="UPnPDeviceDiscovery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

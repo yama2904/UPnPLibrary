@@ -18,12 +18,12 @@ namespace UPnPLibrary.Ssdp
         public const int MULTICAST_PORT = 1900;
 
         /// <summary>
-        /// M-SEARCHリクエストのMX値
+        /// M-SEARCHリクエストのタイムアウト時間（秒）
         /// </summary>
         public int Mx { get; set; }
 
         /// <summary>
-        /// M-SEARCHリクエストのST値
+        /// M-SEARCHリクエストの対象デバイス
         /// </summary>
         public string St { get; set; }
 
@@ -33,7 +33,7 @@ namespace UPnPLibrary.Ssdp
         public string Append { get; set; }
 
         /// <summary>
-        /// リクエスト
+        /// リクエスト雛形
         /// </summary>
         private const string REQUEST_FORMAT = @"M-SEARCH * HTTP/1.1
 HOST: {0}:{1}
@@ -48,10 +48,10 @@ ST: {3}
         private readonly Encoding _encoding = Encoding.UTF8;
 
         /// <summary>
-        /// メッセージ初期化
+        /// MX値とST値を指定してメッセージ初期化
         /// </summary>
-        /// <param name="mx">M-SEARCHリクエストのMX値</param>
-        /// <param name="st">M-SEARCHリクエストのST値</param>
+        /// <param name="mx">M-SEARCHリクエストのタイムアウト時間（秒）</param>
+        /// <param name="st">M-SEARCHリクエストの対象デバイス</param>
         /// <param name="append">M-SEARCHリクエストに追加するフィールド</param>
         public MSearchMessage(int mx, string st, string append = "")
         {
@@ -64,7 +64,7 @@ ST: {3}
         /// M-SEARCHメッセージ作成
         /// </summary>
         /// <returns>M-SEARCHメッセージ</returns>
-        public string CreateMSearch()
+        public string CreateMessage()
         {
             string message = string.Format(REQUEST_FORMAT, MULTICAST_IP, MULTICAST_PORT, Mx, St);
             if (!string.IsNullOrEmpty(Append))
@@ -76,12 +76,12 @@ ST: {3}
         }
 
         /// <summary>
-        /// M-SEARCHメッセージをバイト変換
+        /// バイト配列でM-SEARCHメッセージ作成
         /// </summary>
         /// <returns>M-SEARCHメッセージ</returns>
-        public byte[] CreateMSearchWithBytes()
+        public byte[] CreateMessageAsByteArray()
         {
-            return _encoding.GetBytes(CreateMSearch());
+            return _encoding.GetBytes(CreateMessage());
         }
     }
 }

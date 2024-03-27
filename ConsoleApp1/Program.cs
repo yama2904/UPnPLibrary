@@ -12,7 +12,17 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            UPnPDevicesDiscovery.FindDevices();
+            UPnPDevice device = new UPnPDeviceDiscovery(UPnPTarget.InternetGatewayDevice).FindDevice();
+
+            UPnPRequestMessage message = new UPnPRequestMessage("GetExternalIPAddress", "WANIPConnection:1");
+            Dictionary<string, string> response = new UPnPClient(device).RequestAsync(message).Result;
+            
+            foreach (string key in response.Keys)
+            {
+                Console.WriteLine($"{key}={response[key]}");
+            }
+
+            string a = "";
         }
     }
 }
