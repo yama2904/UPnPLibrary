@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 using UPnPLibrary.Description.Device;
-using UPnPLibrary.Description.Service;
 using UPnPLibrary.Ssdp;
 
 namespace UPnPLibrary
@@ -26,13 +26,21 @@ namespace UPnPLibrary
         /// </summary>
         public int SearchTimeoutSec { get; set; } = 3;
 
-        public UPnPTarget UPnPTarget { get; private set; }
+        public UPnPType UPnPType { get; private set; }
 
 
         public MSearchMessage RequestMSearchMessage { get; private set; } = null;
 
 
         public NotifyMessage ResponseNotifyMessage { get; private set; } = null;
+
+        /// <summary>
+        /// UPnPデバイスのIPアドレス
+        /// </summary>
+        public IPAddress IpAddress { get; set; } = null;
+
+
+        public Uri UPnPUri { get; set; } = null;
 
         /// <summary>
         /// M-SEARCHリクエストの検出対象デバイス
@@ -47,14 +55,14 @@ namespace UPnPLibrary
         private const int MAX_RESULT_SIZE = 8096;
 
 
-        public UPnPDeviceDiscovery(UPnPTarget target)
+        public UPnPDeviceDiscovery(UPnPType type)
         {
-            UPnPTarget = target;
+            UPnPType = type;
         }
 
-        public UPnPDevice FindDevice()
+        public async Task<DeviceDescription> FindDeviceAsync()
         {
-            UPnPDevice device = null;
+            DeviceDescription device = new DeviceDescription();
 
             // M-SEARCHメッセージ作成
             RequestMSearchMessage = new MSearchMessage(SearchTimeoutSec, SEATCH_TARGET);
@@ -81,28 +89,24 @@ namespace UPnPLibrary
 
                 if (ResponseNotifyMessage.IsOk())
                 {
-                    device = new UPnPDevice();
-
-                    device.IpAddress = (remoteEp as IPEndPoint).Address;
+                    IpAddress = (remoteEp as IPEndPoint).Address;
 
                     // Location取得
                     string location = ResponseNotifyMessage.GetHeaderField("location");
 
                     // Locationからパス部分を除去したURLを取得
-                    device.UPnPUrl = new Uri(location).GetLeftPart(UriPartial.Authority);
+                    string url = new Uri(location).GetLeftPart(UriPartial.Authority);
+                    UPnPUri = new Uri(url);
 
                     // Locationからデバイス情報取得
-                    device.DeviceDescription = RequestDeviceDescription(location);
-
-                    // サービス情報取得
-                    device.ServiceDescriptionList = RequestServiceDescriptions(device.UPnPUrl, device.DeviceDescription);
+                    device = await RequestDeviceDescriptionAsync(location);
                 }
             }
 
             return device;
         }
 
-        private DeviceDescription RequestDeviceDescription(string location)
+        private async Task<DeviceDescription> RequestDeviceDescriptionAsync(string location)
         {
             // 戻り値
             DeviceDescription device = new DeviceDescription();
@@ -110,47 +114,15 @@ namespace UPnPLibrary
             using (var client = new HttpClient())
             {
                 // GETリクエスト
-                HttpResponseMessage response = client.GetAsync(location).Result;
-                byte[] bytes = response.Content.ReadAsByteArrayAsync().Result;
-                
-                // 文字列変換
-                string xml = Encoding.UTF8.GetString(bytes);
+                HttpResponseMessage response = await client.GetAsync(location);
+                Stream stream = await response.Content.ReadAsStreamAsync();
 
                 // XML読み込み
-                device.LoadXml(xml);
+                XmlSerializer serializer = new XmlSerializer(typeof(DeviceDescription));
+                device = serializer.Deserialize(stream) as DeviceDescription;
             }
 
             return device;
-        }
-
-        private Dictionary<string, ServiceDescription> RequestServiceDescriptions(string uPnPUrl, DeviceDescription device)
-        {
-            // 戻り値
-            Dictionary<string, ServiceDescription> services = new Dictionary<string, ServiceDescription>();
-
-            // Url文字列をUriクラスへ変換
-            Uri uri = new Uri(uPnPUrl);
-
-            using (var client = new HttpClient())
-            {
-                foreach (ServiceInfo info in device.ServiceInfos) 
-                {
-                    // GETリクエスト
-                    HttpResponseMessage response = client.GetAsync(new Uri(uri, info.ScpdUrl)).Result;
-                    byte[] bytes = response.Content.ReadAsByteArrayAsync().Result;
-
-                    // 文字列変換
-                    string xml = Encoding.UTF8.GetString(bytes);
-
-                    // XML読み込み
-                    ServiceDescription service = new ServiceDescription();
-                    service.LoadXml(xml);
-
-                    services.Add(info.ServiceTypeName, service);
-                }
-            }
-
-            return services;
         }
     }
 }

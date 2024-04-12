@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using UPnPLibrary.Description.Device;
 
 namespace UPnPLibrary
 {
@@ -7,7 +8,7 @@ namespace UPnPLibrary
     {
         public string ActionName { get; set; }
 
-        public string ServiceType { get; set; }
+        public Service Service { get; set; }
 
         public Dictionary<string, string> Arguments { get; set; } = new Dictionary<string, string>();
 
@@ -19,14 +20,14 @@ namespace UPnPLibrary
   <SOAP-ENV:Body>
     <m:{0} xmlns:m=""urn:schemas-upnp-org:service:{1}"">
       {2}
-    </m:AddPortMapping>
+    </m:{0}>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>";
 
-        public UPnPRequestMessage(string actionName, string serviceType, Dictionary<string, string> arguments = null)
+        public UPnPRequestMessage(string actionName, Service service, Dictionary<string, string> arguments = null)
         {
             ActionName = actionName;
-            ServiceType = serviceType;
+            Service = service;
 
             if (arguments != null)
             {
@@ -40,7 +41,7 @@ namespace UPnPLibrary
         /// <returns>リクエストメッセージ</returns>
         public string CreateMessage()
         {
-            return string.Format(REQUEST_FORMAT, ActionName, ServiceType, CreateArgmentXml());
+            return string.Format(REQUEST_FORMAT, ActionName, Service.ServiceTypeName, CreateArgmentXml());
         }
         
         private string CreateArgmentXml()

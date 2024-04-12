@@ -41,22 +41,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Description\Device\DeviceInfo.cs" />
-    <Compile Include="Description\Device\IconInfo.cs" />
-    <Compile Include="Description\Device\ServiceInfo.cs" />
-    <Compile Include="Description\Service\Action\ActionInfo.cs" />
-    <Compile Include="Description\Service\Action\Argument.cs" />
+    <Compile Include="Description\Device\Device.cs" />
+    <Compile Include="Description\Device\Icon.cs" />
+    <Compile Include="Description\Device\Service.cs" />
+    <Compile Include="Description\SpecVersion.cs" />
+    <Compile Include="Description\Service\Action.cs" />
+    <Compile Include="Description\Service\Argument.cs" />
     <Compile Include="Description\Service\ServiceDescription.cs" />
     <Compile Include="Description\Device\DeviceDescription.cs" />
-    <Compile Include="Description\Service\ServiceDescriptionList.cs" />
-    <Compile Include="Description\Service\StateVariable\AllowedValueRange.cs" />
-    <Compile Include="Description\Service\StateVariable\StateVariableInfo.cs" />
+    <Compile Include="Description\Service\AllowedValueRange.cs" />
+    <Compile Include="Description\Service\StateVariable.cs" />
     <Compile Include="Ssdp\MSearchMessage.cs" />
     <Compile Include="Ssdp\NotifyMessage.cs" />
     <Compile Include="UPnPClient.cs" />
     <Compile Include="UPnPDevice.cs" />
+    <Compile Include="UPnPResponseException.cs" />
     <Compile Include="UPnPRequestMessage.cs" />
-    <Compile Include="UPnPTarget.cs" />
+    <Compile Include="UPnPResponseMessage.cs" />
+    <Compile Include="UPnPType.cs" />
     <Compile Include="UPnPDeviceDiscovery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

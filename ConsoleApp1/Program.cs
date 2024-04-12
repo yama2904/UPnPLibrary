@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using UPnPLibrary;
+using UPnPLibrary.Description.Device;
+using UPnPLibrary.Description.Service;
 
 namespace ConsoleApp1
 {
@@ -12,11 +11,18 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            UPnPDevice device = new UPnPDeviceDiscovery(UPnPTarget.InternetGatewayDevice).FindDevice();
+            UPnPDeviceDiscovery deviceClient = new UPnPDeviceDiscovery(UPnPType.InternetGatewayDevice);
+            DeviceDescription device = deviceClient.FindDeviceAsync().Result;
+            List<Service> services = device.GetServiceList();
 
-            UPnPRequestMessage message = new UPnPRequestMessage("GetExternalIPAddress", "WANIPConnection:1");
-            Dictionary<string, string> response = new UPnPClient(device).RequestAsync(message).Result;
-            
+            Service useService = services.Where(x => x.ServiceTypeName == "WANIPConnection:1").FirstOrDefault();
+
+            UPnPClient serviceClient = new UPnPClient(deviceClient.UPnPUri);
+            ServiceDescription service = serviceClient.RequestServiceDescriptionAsync(useService).Result;
+
+            UPnPRequestMessage message = new UPnPRequestMessage("GetGenericPortMappingEntry", useService);
+            Dictionary<string, string> response = serviceClient.RequestUPnPServiceAsync(message).Result;
+
             foreach (string key in response.Keys)
             {
                 Console.WriteLine($"{key}={response[key]}");
