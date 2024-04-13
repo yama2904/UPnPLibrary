@@ -1,26 +1,40 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using UPnPLibrary.Description.Device;
 using System.Xml;
-using System.Collections.Generic;
-using System.IO;
 using System.Xml.Serialization;
+using UPnPLibrary.Description.Device;
 using UPnPLibrary.Description.Service;
 
 namespace UPnPLibrary
 {
+    /// <summary>
+    /// UPnPサービスの送受信を管理するクラス
+    /// </summary>
     public class UPnPClient
     {
+        /// <summary>
+        /// UPnPサービスリクエスト用URL
+        /// </summary>
         public Uri UPnPUri { get; set; } = null;
 
+        /// <summary>
+        /// UPnPサービスURLを指定してインスタンスを初期化する
+        /// </summary>
+        /// <param name="uPnPUri">UPnPサービスリクエスト用URL</param>
         public UPnPClient(Uri uPnPUri) 
         {
             UPnPUri = uPnPUri;
         }
 
+        /// <summary>
+        /// UPnPサービス詳細情報取得
+        /// </summary>
+        /// <param name="service">取得するUPnPサービス</param>
+        /// <returns>取得したUPnPサービス詳細情報</returns>
         public async Task<ServiceDescription> RequestServiceDescriptionAsync(Service service)
         {
             // 戻り値
@@ -40,7 +54,12 @@ namespace UPnPLibrary
             return serviceDescription;
         }
 
-        public async Task<Dictionary<string, string>> RequestUPnPServiceAsync(UPnPRequestMessage message)
+        /// <summary>
+        /// UPnPアクションリクエスト
+        /// </summary>
+        /// <param name="message">リクエストメッセージ</param>
+        /// <returns>レスポンスメッセージ</returns>
+        public async Task<Dictionary<string, string>> RequestUPnPActionAsync(UPnPActionRequestMessage message)
         {
             // 戻り値
             Dictionary<string, string> responseMap = new Dictionary<string, string>();
@@ -59,7 +78,7 @@ namespace UPnPLibrary
                 // HTTPステータスコードが500の場合はUPnPError
                 if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
                 {
-                    UPnPResponseException exception = CreateUPnPResponseException(responseXml, "UPnPリクエストに失敗しました。");
+                    UPnPActionException exception = CreateUPnPActionException(responseXml, "UPnPリクエストに失敗しました。");
                     throw exception;
                 }
 
@@ -81,10 +100,16 @@ namespace UPnPLibrary
             return responseMap;
         }
 
-        private UPnPResponseException CreateUPnPResponseException(string responseXml, string message)
+        /// <summary>
+        /// UPnPエラーを解析してUPnPアクションエラーインスタンスを返す
+        /// </summary>
+        /// <param name="responseXml">UPnPエラーが記載されたXML</param>
+        /// <param name="message">例外メッセージ</param>
+        /// <returns>生成したUPnPアクションエラーインスタンス</returns>
+        private UPnPActionException CreateUPnPActionException(string responseXml, string message)
         {
             // 戻り値
-            UPnPResponseException exception = new UPnPResponseException(message);
+            UPnPActionException exception = new UPnPActionException(message);
 
             // Xml読み込み
             XmlDocument xml = new XmlDocument();

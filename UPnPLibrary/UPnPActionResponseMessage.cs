@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UPnPLibrary
 {
-    public class UPnPResponseMessage
+    /// <summary>
+    /// UPnPアクションのレスポンスメッセージクラス
+    /// </summary>
+    public class UPnPActionResponseMessage
     {
         /// <summary>
         /// HTTP応答のステータスコード
@@ -20,7 +19,9 @@ namespace UPnPLibrary
         /// </summary>
         public HttpResponseHeaders Headers { get; set; }
 
-
-        public Dictionary<string, string> Arguments { get; set; }
+        /// <summary>
+        /// レスポンスパラメータ
+        /// </summary>
+        public Dictionary<string, string> Parameters { get; set; }
     }
 }

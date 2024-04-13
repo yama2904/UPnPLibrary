@@ -5,20 +5,29 @@ using System.Xml.Serialization;
 namespace UPnPLibrary.Description.Service
 {
     /// <summary>
-    /// UPnPのサービス情報管理クラス
+    /// UPnPサービス詳細情報管理クラス
     /// </summary>
     [XmlRoot("scpd", Namespace = "urn:schemas-upnp-org:service-1-0")]
     public class ServiceDescription
     {
+        /// <summary>
+        /// UPnPデバイスアーキテクチャのバージョン
+        /// </summary>
         [XmlElement("specVersion")]
-        public SpecVersion SpecVersion { get; set; }
+        public SpecVersion SpecVersion { get; set; } = null;
 
+        /// <summary>
+        /// サービスアクションリスト
+        /// </summary>
         [XmlArray("actionList")]
         [XmlArrayItem("action")]
-        public List<Action> ActionList = new List<Action>();
+        public List<Action> ActionList = null;
 
+        /// <summary>
+        /// サービス状態変数リスト
+        /// </summary>
         [XmlArray("serviceStateTable")]
         [XmlArrayItem("stateVariable")]
-        public List<StateVariable> ServiceStateTable = new List<StateVariable>();
+        public List<StateVariable> ServiceStateTable = null;
     }
 }

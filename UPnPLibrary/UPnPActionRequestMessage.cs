@@ -4,13 +4,25 @@ using UPnPLibrary.Description.Device;
 
 namespace UPnPLibrary
 {
-    public class UPnPRequestMessage
+    /// <summary>
+    /// UPnPアクションのリクエストメッセージクラス
+    /// </summary>
+    public class UPnPActionRequestMessage
     {
-        public string ActionName { get; set; }
+        /// <summary>
+        /// リクエスト先サービス
+        /// </summary>
+        public Service Service { get; set; } = null;
 
-        public Service Service { get; set; }
+        /// <summary>
+        /// サービスアクション
+        /// </summary>
+        public string ActionName { get; set; } = null;
 
-        public Dictionary<string, string> Arguments { get; set; } = new Dictionary<string, string>();
+        /// <summary>
+        /// アクション引数
+        /// </summary>
+        public Dictionary<string, string> Arguments { get; set; } = null;
 
         /// <summary>
         /// リクエスト雛形
@@ -24,7 +36,13 @@ namespace UPnPLibrary
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>";
 
-        public UPnPRequestMessage(string actionName, Service service, Dictionary<string, string> arguments = null)
+        /// <summary>
+        /// リクエスト内容を指定してメッセージ初期化
+        /// </summary>
+        /// <param name="service">リクエスト先サービス</param>
+        /// <param name="actionName">サービスアクション</param>
+        /// <param name="arguments">アクション引数</param>
+        public UPnPActionRequestMessage(Service service, string actionName, Dictionary<string, string> arguments = null)
         {
             ActionName = actionName;
             Service = service;
@@ -44,6 +62,10 @@ namespace UPnPLibrary
             return string.Format(REQUEST_FORMAT, ActionName, Service.ServiceTypeName, CreateArgmentXml());
         }
         
+        /// <summary>
+        /// リクエストメッセージの引数部作成
+        /// </summary>
+        /// <returns>作成した引数部のメッセージ</returns>
         private string CreateArgmentXml()
         {
             // 戻り値

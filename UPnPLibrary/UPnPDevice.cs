@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using UPnPLibrary.Description.Device;
-using UPnPLibrary.Description.Service;
 
 namespace UPnPLibrary
 {

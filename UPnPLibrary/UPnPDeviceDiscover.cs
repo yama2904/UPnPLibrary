@@ -14,7 +14,7 @@ namespace UPnPLibrary
     /// <summary>
     /// UPnP対応デバイス検索クラス
     /// </summary>
-    public class UPnPDeviceDiscovery
+    public class UPnPDeviceDiscover
     {
         /// <summary>
         /// リクエストの送信元ポート番号
@@ -28,10 +28,14 @@ namespace UPnPLibrary
 
         public UPnPType UPnPType { get; private set; }
 
-
+        /// <summary>
+        /// デバイス検索に使用したM-SEARCHメッセージ
+        /// </summary>
         public MSearchMessage RequestMSearchMessage { get; private set; } = null;
 
-
+        /// <summary>
+        /// M-SEARCHメッセージの応答で解析したNOTIFYメッセージ
+        /// </summary>
         public NotifyMessage ResponseNotifyMessage { get; private set; } = null;
 
         /// <summary>
@@ -39,7 +43,9 @@ namespace UPnPLibrary
         /// </summary>
         public IPAddress IpAddress { get; set; } = null;
 
-
+        /// <summary>
+        /// UPnPデバイスのリクエスト用URL
+        /// </summary>
         public Uri UPnPUri { get; set; } = null;
 
         /// <summary>
@@ -54,12 +60,19 @@ namespace UPnPLibrary
         /// </summary>
         private const int MAX_RESULT_SIZE = 8096;
 
-
-        public UPnPDeviceDiscovery(UPnPType type)
+        /// <summary>
+        /// インスタンス初期化
+        /// </summary>
+        /// <param name="type"></param>
+        public UPnPDeviceDiscover(UPnPType type)
         {
             UPnPType = type;
         }
 
+        /// <summary>
+        /// UPnPデバイス検索
+        /// </summary>
+        /// <returns>発見したデバイス情報</returns>
         public async Task<DeviceDescription> FindDeviceAsync()
         {
             DeviceDescription device = new DeviceDescription();
@@ -106,7 +119,12 @@ namespace UPnPLibrary
             return device;
         }
 
-        private async Task<DeviceDescription> RequestDeviceDescriptionAsync(string location)
+        /// <summary>
+        /// UPnPデバイス情報取得
+        /// </summary>
+        /// <param name="deviceUrl">UPnPデバイスのリクエスト用URL</param>
+        /// <returns>取得したUPnPデバイス情報</returns>
+        private async Task<DeviceDescription> RequestDeviceDescriptionAsync(string deviceUrl)
         {
             // 戻り値
             DeviceDescription device = new DeviceDescription();
@@ -114,7 +132,7 @@ namespace UPnPLibrary
             using (var client = new HttpClient())
             {
                 // GETリクエスト
-                HttpResponseMessage response = await client.GetAsync(location);
+                HttpResponseMessage response = await client.GetAsync(deviceUrl);
                 Stream stream = await response.Content.ReadAsStreamAsync();
 
                 // XML読み込み

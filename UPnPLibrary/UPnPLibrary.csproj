@@ -44,6 +44,7 @@
     <Compile Include="Description\Device\Device.cs" />
     <Compile Include="Description\Device\Icon.cs" />
     <Compile Include="Description\Device\Service.cs" />
+    <Compile Include="Description\Service\StateVariableDataType.cs" />
     <Compile Include="Description\SpecVersion.cs" />
     <Compile Include="Description\Service\Action.cs" />
     <Compile Include="Description\Service\Argument.cs" />
@@ -55,11 +56,11 @@
     <Compile Include="Ssdp\NotifyMessage.cs" />
     <Compile Include="UPnPClient.cs" />
     <Compile Include="UPnPDevice.cs" />
-    <Compile Include="UPnPResponseException.cs" />
-    <Compile Include="UPnPRequestMessage.cs" />
-    <Compile Include="UPnPResponseMessage.cs" />
+    <Compile Include="UPnPActionException.cs" />
+    <Compile Include="UPnPActionRequestMessage.cs" />
+    <Compile Include="UPnPActionResponseMessage.cs" />
     <Compile Include="UPnPType.cs" />
-    <Compile Include="UPnPDeviceDiscovery.cs" />
+    <Compile Include="UPnPDeviceDiscover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
