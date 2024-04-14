@@ -4,12 +4,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using UPnPLibrary.Description.Device;
-using UPnPLibrary.Ssdp;
 
-namespace UPnPLibrary
+namespace UPnPLibrary.Ssdp
 {
     /// <summary>
     /// UPnP対応デバイス検索クラス
@@ -31,12 +31,12 @@ namespace UPnPLibrary
         /// <summary>
         /// デバイス検索に使用したM-SEARCHメッセージ
         /// </summary>
-        public MSearchMessage RequestMSearchMessage { get; private set; } = null;
+        public MSearchRequestMessage RequestMSearchMessage { get; private set; } = null;
 
         /// <summary>
         /// M-SEARCHメッセージの応答で解析したNOTIFYメッセージ
         /// </summary>
-        public NotifyMessage ResponseNotifyMessage { get; private set; } = null;
+        public MSearchResponseMessage ResponseNotifyMessage { get; private set; } = null;
 
         /// <summary>
         /// UPnPデバイスのIPアドレス
@@ -78,12 +78,12 @@ namespace UPnPLibrary
             DeviceDescription device = new DeviceDescription();
 
             // M-SEARCHメッセージ作成
-            RequestMSearchMessage = new MSearchMessage(SearchTimeoutSec, SEATCH_TARGET);
+            RequestMSearchMessage = new MSearchRequestMessage(SearchTimeoutSec, SEATCH_TARGET);
             byte[] send = RequestMSearchMessage.CreateMessageAsByteArray();
 
             // M-SEARCH送信先
-            IPAddress ip = IPAddress.Parse(MSearchMessage.MULTICAST_IP);
-            int port = MSearchMessage.MULTICAST_PORT;
+            IPAddress ip = IPAddress.Parse(MSearchRequestMessage.MULTICAST_IP);
+            int port = MSearchRequestMessage.MULTICAST_PORT;
 
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
@@ -98,21 +98,19 @@ namespace UPnPLibrary
                 // 受信
                 byte[] buffer = new byte[MAX_RESULT_SIZE];
                 int size = socket.ReceiveFrom(buffer, ref remoteEp);
-                ResponseNotifyMessage = new NotifyMessage(buffer.Take(size).ToArray());
+                string message = Encoding.UTF8.GetString(buffer.Take(size).ToArray());
+                ResponseNotifyMessage = new MSearchResponseMessage(message);
 
-                if (ResponseNotifyMessage.IsOk())
+                if (ResponseNotifyMessage.IsSuccess())
                 {
                     IpAddress = (remoteEp as IPEndPoint).Address;
 
-                    // Location取得
-                    string location = ResponseNotifyMessage.GetHeaderField("location");
-
                     // Locationからパス部分を除去したURLを取得
-                    string url = new Uri(location).GetLeftPart(UriPartial.Authority);
+                    string url = new Uri(ResponseNotifyMessage.Location).GetLeftPart(UriPartial.Authority);
                     UPnPUri = new Uri(url);
 
                     // Locationからデバイス情報取得
-                    device = await RequestDeviceDescriptionAsync(location);
+                    device = await RequestDeviceDescriptionAsync(ResponseNotifyMessage.Location);
                 }
             }
 

@@ -3,9 +3,9 @@
 namespace UPnPLibrary.Ssdp
 {
     /// <summary>
-    /// M-SEARCHメッセージ管理クラス
+    /// M-SEARCHリクエストメッセージクラス
     /// </summary>
-    public class MSearchMessage
+    public class MSearchRequestMessage
     {
         /// <summary>
         /// 宛先マルチキャストアドレス
@@ -53,7 +53,7 @@ ST: {3}
         /// <param name="mx">M-SEARCHリクエストのタイムアウト時間（秒）</param>
         /// <param name="st">M-SEARCHリクエストの対象デバイス</param>
         /// <param name="append">M-SEARCHリクエストに追加するフィールド</param>
-        public MSearchMessage(int mx, string st, string append = "")
+        public MSearchRequestMessage(int mx, string st, string append = "")
         {
             Mx = mx;
             St = st;

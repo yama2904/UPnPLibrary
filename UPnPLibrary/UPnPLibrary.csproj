@@ -52,15 +52,15 @@
     <Compile Include="Description\Device\DeviceDescription.cs" />
     <Compile Include="Description\Service\AllowedValueRange.cs" />
     <Compile Include="Description\Service\StateVariable.cs" />
-    <Compile Include="Ssdp\MSearchMessage.cs" />
-    <Compile Include="Ssdp\NotifyMessage.cs" />
+    <Compile Include="Ssdp\MSearchRequestMessage.cs" />
+    <Compile Include="Ssdp\MSearchResponseMessage.cs" />
     <Compile Include="UPnPClient.cs" />
     <Compile Include="UPnPDevice.cs" />
     <Compile Include="UPnPActionException.cs" />
     <Compile Include="UPnPActionRequestMessage.cs" />
     <Compile Include="UPnPActionResponseMessage.cs" />
     <Compile Include="UPnPType.cs" />
-    <Compile Include="UPnPDeviceDiscover.cs" />
+    <Compile Include="Ssdp\UPnPDeviceDiscover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

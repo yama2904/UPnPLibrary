@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UPnPLibrary;
 using UPnPLibrary.Description.Device;
+using UPnPLibrary.Ssdp;
 
 namespace ConsoleApp1
 {
