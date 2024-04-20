@@ -55,11 +55,10 @@
     <Compile Include="Ssdp\MSearchRequestMessage.cs" />
     <Compile Include="Ssdp\MSearchResponseMessage.cs" />
     <Compile Include="UPnPClient.cs" />
-    <Compile Include="UPnPDevice.cs" />
+    <Compile Include="UPnPDeviceAccess.cs" />
     <Compile Include="UPnPActionException.cs" />
     <Compile Include="UPnPActionRequestMessage.cs" />
     <Compile Include="UPnPActionResponseMessage.cs" />
-    <Compile Include="UPnPType.cs" />
     <Compile Include="Ssdp\UPnPDeviceDiscover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

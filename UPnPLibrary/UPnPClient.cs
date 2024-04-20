@@ -12,22 +12,45 @@ using UPnPLibrary.Description.Service;
 namespace UPnPLibrary
 {
     /// <summary>
-    /// UPnPサービスの送受信を管理するクラス
+    /// UPnPデバイスとの送受信を管理するクラス
     /// </summary>
     public class UPnPClient
     {
         /// <summary>
-        /// UPnPサービスリクエスト用URL
+        /// 送受信先UPnPデバイスアクセス情報
         /// </summary>
-        public Uri UPnPUri { get; set; } = null;
+        public UPnPDeviceAccess DeviceAccess { get; private set; } = null;
 
         /// <summary>
-        /// UPnPサービスURLを指定してインスタンスを初期化する
+        /// 送受信先UPnPデバイスを指定してインスタンスを初期化する
         /// </summary>
-        /// <param name="uPnPUri">UPnPサービスリクエスト用URL</param>
-        public UPnPClient(Uri uPnPUri) 
+        /// <param name="deviceAccess">送受信先UPnPデバイスアクセス情報</param>
+        public UPnPClient(UPnPDeviceAccess deviceAccess) 
         {
-            UPnPUri = uPnPUri;
+            DeviceAccess = deviceAccess;
+        }
+
+        /// <summary>
+        /// UPnPデバイス情報取得
+        /// </summary>
+        /// <returns>取得したUPnPデバイス情報</returns>
+        public async Task<DeviceDescription> RequestDeviceDescriptionAsync()
+        {
+            // 戻り値
+            DeviceDescription device = new DeviceDescription();
+
+            using (var client = new HttpClient())
+            {
+                // GETリクエスト
+                HttpResponseMessage response = await client.GetAsync(DeviceAccess.Location);
+                Stream stream = await response.Content.ReadAsStreamAsync();
+
+                // XML読み込み
+                XmlSerializer serializer = new XmlSerializer(typeof(DeviceDescription));
+                device = serializer.Deserialize(stream) as DeviceDescription;
+            }
+
+            return device;
         }
 
         /// <summary>
@@ -43,7 +66,7 @@ namespace UPnPLibrary
             using (var client = new HttpClient())
             {
                 // GETリクエスト
-                HttpResponseMessage response = await client.GetAsync(new Uri(UPnPUri, service.ScpdUrl));
+                HttpResponseMessage response = await client.GetAsync(new Uri(DeviceAccess.UPnPUrl, service.ScpdUrl));
                 Stream stream = await response.Content.ReadAsStreamAsync();
 
                 // XML読み込み
@@ -65,7 +88,7 @@ namespace UPnPLibrary
             Dictionary<string, string> responseMap = new Dictionary<string, string>();
 
             using (var client = new HttpClient())
-            using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri(UPnPUri, message.Service.ControlURL)))
+            using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri(DeviceAccess.UPnPUrl, message.Service.ControlURL)))
             using (var content = new StringContent(message.CreateMessage(), Encoding.UTF8, "text/xml"))
             {
                 request.Content = content;
@@ -88,7 +111,7 @@ namespace UPnPLibrary
 
                 // 名前空間設定
                 XmlNamespaceManager xmlns = new XmlNamespaceManager(xml.NameTable);
-                xmlns.AddNamespace("n", $"urn:schemas-upnp-org:service:{message.Service}");
+                xmlns.AddNamespace("n", $"urn:schemas-upnp-org:service:{message.Service.ServiceTypeName}");
 
                 XmlNodeList values = xml.SelectNodes($"//n:{message.ActionName}Response/*", xmlns);
                 foreach (XmlNode value in values)

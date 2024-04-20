@@ -68,6 +68,11 @@ namespace UPnPLibrary
         /// <returns>作成した引数部のメッセージ</returns>
         private string CreateArgmentXml()
         {
+            if (Arguments == null)
+            {
+                return string.Empty;
+            }
+
             // 戻り値
             StringBuilder xml = new StringBuilder();
 

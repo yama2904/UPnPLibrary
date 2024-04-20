@@ -44,7 +44,7 @@ namespace UPnPLibrary.Ssdp
                 }
 
                 // フィールド名とフィールド値取得
-                string field = line.Substring(pos);
+                string field = line.Substring(0, pos);
                 string value = line.Substring(pos + HEADER_FIELD_DELIMITER.Length);
 
                 switch (field.ToLower())

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using UPnPLibrary.Description.Device;
 
 namespace UPnPLibrary.Ssdp
 {
@@ -26,34 +23,23 @@ namespace UPnPLibrary.Ssdp
         /// </summary>
         public int SearchTimeoutSec { get; set; } = 3;
 
-        public UPnPType UPnPType { get; private set; }
+        /// <summary>
+        /// デバイス検索に使用したM-SEARCHメッセージリスト
+        /// </summary>
+        public List<MSearchRequestMessage> RequestMSearchMessages { get; private set; } = null;
 
         /// <summary>
-        /// デバイス検索に使用したM-SEARCHメッセージ
+        /// M-SEARCHメッセージの応答メッセージリスト
         /// </summary>
-        public MSearchRequestMessage RequestMSearchMessage { get; private set; } = null;
-
-        /// <summary>
-        /// M-SEARCHメッセージの応答で解析したNOTIFYメッセージ
-        /// </summary>
-        public MSearchResponseMessage ResponseNotifyMessage { get; private set; } = null;
-
-        /// <summary>
-        /// UPnPデバイスのIPアドレス
-        /// </summary>
-        public IPAddress IpAddress { get; set; } = null;
-
-        /// <summary>
-        /// UPnPデバイスのリクエスト用URL
-        /// </summary>
-        public Uri UPnPUri { get; set; } = null;
+        public List<MSearchResponseMessage> ResponseMSearchMessages { get; private set; } = null;
 
         /// <summary>
         /// M-SEARCHリクエストの検出対象デバイス
         /// </summary>
-        private const string SEATCH_TARGET = "urn:schemas-upnp-org:device:InternetGatewayDevice:1";
-        //private const string SEATCH_TARGET = "urn:schemas-upnp-org:service:WANPPPConnection:1";
-        //private const string SEATCH_TARGET = "urn:schemas-upnp-org:service:WANIPConnection:1";
+        private readonly string[] SEATCH_TARGETS = new string[] {
+                                                        "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
+                                                        "urn:schemas-upnp-org:service:WANPPPConnection:1",
+                                                        "urn:schemas-upnp-org:service:WANIPConnection:1"};
 
         /// <summary>
         /// M-SEARCHレスポンスの最大サイズ
@@ -61,84 +47,98 @@ namespace UPnPLibrary.Ssdp
         private const int MAX_RESULT_SIZE = 8096;
 
         /// <summary>
-        /// インスタンス初期化
-        /// </summary>
-        /// <param name="type"></param>
-        public UPnPDeviceDiscover(UPnPType type)
-        {
-            UPnPType = type;
-        }
-
-        /// <summary>
         /// UPnPデバイス検索
         /// </summary>
-        /// <returns>発見したデバイス情報</returns>
-        public async Task<DeviceDescription> FindDeviceAsync()
+        /// <returns>発見したデバイスのアクセス情報</returns>
+        public async Task<List<UPnPDeviceAccess>> FindDeviceAsync()
         {
-            DeviceDescription device = new DeviceDescription();
+            // 戻り値
+            List<UPnPDeviceAccess> devices = new List<UPnPDeviceAccess>();
 
-            // M-SEARCHメッセージ作成
-            RequestMSearchMessage = new MSearchRequestMessage(SearchTimeoutSec, SEATCH_TARGET);
-            byte[] send = RequestMSearchMessage.CreateMessageAsByteArray();
-
-            // M-SEARCH送信先
+            // M-SEARCH送信先IP/ポート番号取得
             IPAddress ip = IPAddress.Parse(MSearchRequestMessage.MULTICAST_IP);
             int port = MSearchRequestMessage.MULTICAST_PORT;
 
+            // M-SEARCHリクエスト/レスポンス実行
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
                 // UDPマルチキャスト設定
                 socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, ip.GetAddressBytes());
 
-                // 送信
+                // 送信先設定
                 EndPoint remoteEp = new IPEndPoint(ip, port);
                 socket.Bind(new IPEndPoint(IPAddress.Any, LocalPort));
-                socket.SendTo(send, remoteEp);
+
+                // M-SEARCHメッセージ送信
+                RequestMSearchMessages = new List<MSearchRequestMessage>();
+                foreach (string st in SEATCH_TARGETS)
+                {
+                    // メッセージ作成
+                    MSearchRequestMessage requestMsg = new MSearchRequestMessage(SearchTimeoutSec, SEATCH_TARGET);
+                    byte[] send = requestMsg.CreateMessageAsByteArray();
+                    
+                    // 送信
+                    socket.SendTo(send, remoteEp);
+
+                    // リクエストメッセージリストに追加
+                    RequestMSearchMessages.Add(requestMsg);
+                }
 
                 // 受信
-                byte[] buffer = new byte[MAX_RESULT_SIZE];
-                int size = socket.ReceiveFrom(buffer, ref remoteEp);
-                string message = Encoding.UTF8.GetString(buffer.Take(size).ToArray());
-                ResponseNotifyMessage = new MSearchResponseMessage(message);
-
-                if (ResponseNotifyMessage.IsSuccess())
+                ResponseMSearchMessages = new List<MSearchResponseMessage>();
+                Task receiveTask = Task.Run(() =>
                 {
-                    IpAddress = (remoteEp as IPEndPoint).Address;
+                    while (true)
+                    {
+                        // 受信用バッファ/バイト数
+                        byte[] buffer = new byte[MAX_RESULT_SIZE];
+                        int size = -1;
 
-                    // Locationからパス部分を除去したURLを取得
-                    string url = new Uri(ResponseNotifyMessage.Location).GetLeftPart(UriPartial.Authority);
-                    UPnPUri = new Uri(url);
+                        // 受信待ち
+                        try
+                        {
+                            size = socket.ReceiveFrom(buffer, ref remoteEp);
+                        }
+                        catch (SocketException ex)
+                        {
+                            // 受信キャンセル
+                            if (ex.ErrorCode == 10004)
+                            {
+                                break;
+                            }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // 受信キャンセル
+                            break;
+                        }
 
-                    // Locationからデバイス情報取得
-                    device = await RequestDeviceDescriptionAsync(ResponseNotifyMessage.Location);
-                }
+                        // 受信データ解析
+                        string message = Encoding.UTF8.GetString(buffer.Take(size).ToArray());
+                        MSearchResponseMessage responseMsg = new MSearchResponseMessage(message);
+
+                        // リクエスト成功可否
+                        if (responseMsg.IsSuccess())
+                        {
+                            // デバイスアクセス情報取得
+                            UPnPDeviceAccess device = new UPnPDeviceAccess();
+                            device.IpAddress = (remoteEp as IPEndPoint).Address;
+                            device.Location = responseMsg.Location;
+                            devices.Add(device);
+                        }
+
+                        // レスポンスリストに追加
+                        ResponseMSearchMessages.Add(responseMsg);
+                    }
+                });
+
+                // 受信タイムアウト設定
+                await Task.Delay(SearchTimeoutSec * 1000);
+                // タイムアウト
+                socket.Close();
             }
 
-            return device;
-        }
-
-        /// <summary>
-        /// UPnPデバイス情報取得
-        /// </summary>
-        /// <param name="deviceUrl">UPnPデバイスのリクエスト用URL</param>
-        /// <returns>取得したUPnPデバイス情報</returns>
-        private async Task<DeviceDescription> RequestDeviceDescriptionAsync(string deviceUrl)
-        {
-            // 戻り値
-            DeviceDescription device = new DeviceDescription();
-
-            using (var client = new HttpClient())
-            {
-                // GETリクエスト
-                HttpResponseMessage response = await client.GetAsync(deviceUrl);
-                Stream stream = await response.Content.ReadAsStreamAsync();
-
-                // XML読み込み
-                XmlSerializer serializer = new XmlSerializer(typeof(DeviceDescription));
-                device = serializer.Deserialize(stream) as DeviceDescription;
-            }
-
-            return device;
+            return devices;
         }
     }
 }

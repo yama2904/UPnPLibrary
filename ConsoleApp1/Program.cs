@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UPnPLibrary;
 using UPnPLibrary.Description.Device;
+using UPnPLibrary.Description.Service;
 using UPnPLibrary.Ssdp;
 
 namespace ConsoleApp1
@@ -12,24 +13,27 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             // デバイス検索
-            UPnPDeviceDiscover deviceClient = new UPnPDeviceDiscover(UPnPType.InternetGatewayDevice);
-            DeviceDescription device = deviceClient.FindDeviceAsync().Result;
+            UPnPDeviceDiscover discover = new UPnPDeviceDiscover();
+            List<UPnPDeviceAccess> deviceAccesses = discover.FindDeviceAsync().Result;
             
+            // UPnPクライアント初期化
+            UPnPClient upnpClient = new UPnPClient(deviceAccesses[0]);
+
+            // UPnPデバイス情報取得
+            DeviceDescription deviceDescription = upnpClient.RequestDeviceDescriptionAsync().Result;
+
             // UPnPデバイスのサービス情報取得
-            List<Service> services = device.GetServiceList();
+            List<Service> services = deviceDescription.GetServiceList();
 
             // 使用するサービス絞り込み
             Service useService = services.Where(x => x.ServiceTypeName == "WANIPConnection:1").FirstOrDefault();
 
-            // UPnPクライアント初期化
-            UPnPClient serviceClient = new UPnPClient(deviceClient.UPnPUri);
-
             // UPnPサービス詳細情報取得
-            //ServiceDescription service = serviceClient.RequestServiceDescriptionAsync(useService).Result;
+            ServiceDescription serviceDescription = upnpClient.RequestServiceDescriptionAsync(useService).Result;
 
             // UPnPアクション実行
-            UPnPActionRequestMessage message = new UPnPActionRequestMessage(useService, "GetGenericPortMappingEntry");
-            Dictionary<string, string> response = serviceClient.RequestUPnPActionAsync(message).Result;
+            UPnPActionRequestMessage message = new UPnPActionRequestMessage(useService, "GetExternalIPAddress");
+            Dictionary<string, string> response = upnpClient.RequestUPnPActionAsync(message).Result;
 
             // 戻り値出力
             foreach (string key in response.Keys)
