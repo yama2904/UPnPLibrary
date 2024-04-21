@@ -74,7 +74,7 @@ namespace UPnPLibrary.Ssdp
                 foreach (string st in SEATCH_TARGETS)
                 {
                     // メッセージ作成
-                    MSearchRequestMessage requestMsg = new MSearchRequestMessage(SearchTimeoutSec, SEATCH_TARGET);
+                    MSearchRequestMessage requestMsg = new MSearchRequestMessage(SearchTimeoutSec, st);
                     byte[] send = requestMsg.CreateMessageAsByteArray();
                     
                     // 送信
