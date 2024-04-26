@@ -24,6 +24,14 @@ namespace UPnPLibrary.Ssdp
         public int SearchTimeoutSec { get; set; } = 3;
 
         /// <summary>
+        /// M-SEARCHリクエストの検出対象デバイス
+        /// </summary>
+        public List<string> SearchTargets { get; set; } = new List<string> {
+                                                                    "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
+                                                                    "urn:schemas-upnp-org:service:WANPPPConnection:1",
+                                                                    "urn:schemas-upnp-org:service:WANIPConnection:1"};
+
+        /// <summary>
         /// デバイス検索に使用したM-SEARCHメッセージリスト
         /// </summary>
         public List<MSearchRequestMessage> RequestMSearchMessages { get; private set; } = null;
@@ -32,14 +40,6 @@ namespace UPnPLibrary.Ssdp
         /// M-SEARCHメッセージの応答メッセージリスト
         /// </summary>
         public List<MSearchResponseMessage> ResponseMSearchMessages { get; private set; } = null;
-
-        /// <summary>
-        /// M-SEARCHリクエストの検出対象デバイス
-        /// </summary>
-        private readonly string[] SEATCH_TARGETS = new string[] {
-                                                        "urn:schemas-upnp-org:device:InternetGatewayDevice:1",
-                                                        "urn:schemas-upnp-org:service:WANPPPConnection:1",
-                                                        "urn:schemas-upnp-org:service:WANIPConnection:1"};
 
         /// <summary>
         /// M-SEARCHレスポンスの最大サイズ
@@ -71,7 +71,7 @@ namespace UPnPLibrary.Ssdp
 
                 // M-SEARCHメッセージ送信
                 RequestMSearchMessages = new List<MSearchRequestMessage>();
-                foreach (string st in SEATCH_TARGETS)
+                foreach (string st in SearchTargets)
                 {
                     // メッセージ作成
                     MSearchRequestMessage requestMsg = new MSearchRequestMessage(SearchTimeoutSec, st);
