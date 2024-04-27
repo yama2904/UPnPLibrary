@@ -50,7 +50,7 @@ namespace UPnPLibrary.Ssdp
         /// UPnPデバイス検索
         /// </summary>
         /// <returns>発見したデバイスのアクセス情報</returns>
-        public async Task<List<UPnPDeviceAccess>> FindDeviceAsync()
+        public async Task<List<UPnPDeviceAccess>> FindDevicesAsync()
         {
             // 戻り値
             List<UPnPDeviceAccess> devices = new List<UPnPDeviceAccess>();

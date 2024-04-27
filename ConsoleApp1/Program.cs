@@ -14,7 +14,7 @@ namespace ConsoleApp1
         {
             // デバイス検索
             UPnPDeviceDiscover discover = new UPnPDeviceDiscover();
-            List<UPnPDeviceAccess> deviceAccesses = discover.FindDeviceAsync().Result;
+            List<UPnPDeviceAccess> deviceAccesses = discover.FindDevicesAsync().Result;
             
             // UPnPクライアント初期化
             UPnPClient upnpClient = new UPnPClient(deviceAccesses[0]);
