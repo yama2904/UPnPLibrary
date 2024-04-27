@@ -27,7 +27,7 @@ namespace UPnPLibrary.Description.Device
         public string Manufacturer { get;  set; } = null;
 
         /// <summary>
-        /// 製造者のWebサイト
+        /// メーカーのWebサイト
         /// </summary>
         [XmlElement("manufacturerURL")]
         public string ManufacturerURL { get;  set; } = null;
