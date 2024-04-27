@@ -88,6 +88,9 @@ namespace UPnPLibrary.Ssdp
                 ResponseMSearchMessages = new List<MSearchResponseMessage>();
                 Task receiveTask = Task.Run(() =>
                 {
+                    // 受信済みエンドポイント一覧
+                    List<EndPoint> receivedEps = new List<EndPoint>();
+
                     while (true)
                     {
                         // 受信用バッファ/バイト数
@@ -112,6 +115,13 @@ namespace UPnPLibrary.Ssdp
                             // 受信キャンセル
                             break;
                         }
+
+                        // 同じエンドポイントから複数回受信した場合はスキップ
+                        if (receivedEps.Any(x => x.Equals(remoteEp)))
+                        {
+                            continue;
+                        }
+                        receivedEps.Add(remoteEp);
 
                         // 受信データ解析
                         string message = Encoding.UTF8.GetString(buffer.Take(size).ToArray());
