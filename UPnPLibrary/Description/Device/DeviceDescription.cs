@@ -46,11 +46,11 @@ namespace UPnPLibrary.Description.Device
             {
                 foreach (Device d in device.DeviceList)
                 {
-                    services = services.Concat(GetServiceList(d));
+                    services = GetServiceList(d);
                 }
             }
 
-            return services.Concat(device.ServiceList).ToList();
+            return device.ServiceList.Concat(services).ToList();
         }
     }
 }
