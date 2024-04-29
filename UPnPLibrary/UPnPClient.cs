@@ -82,6 +82,7 @@ namespace UPnPLibrary
         /// </summary>
         /// <param name="message">リクエストメッセージ</param>
         /// <returns>レスポンスメッセージ</returns>
+        /// <exception cref="UPnPActionException"></exception>
         public async Task<Dictionary<string, string>> RequestUPnPActionAsync(UPnPActionRequestMessage message)
         {
             // 戻り値

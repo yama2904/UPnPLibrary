@@ -84,7 +84,7 @@ namespace UPnPLibrary
                     xml.Append("\n");
                 }
 
-                xml.Append(string.Format("<{0}>{1}<{0}/>", argument.Key, argument.Value));
+                xml.Append(string.Format("<{0}>{1}</{0}>", argument.Key, argument.Value));
                 first = false;
             }
 
